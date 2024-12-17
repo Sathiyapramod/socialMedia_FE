@@ -1,61 +1,58 @@
-import React, { useEffect, useState } from "react";
-import auth from "../../utils/firebase.ts";
+import React, { useState } from "react";
 
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
-import Custom from "./Custom";
+import { useNavigate } from "react-router-dom";
 
-const provider = new GoogleAuthProvider();
-provider.addScope("https://www.googleapis.com/auth/plus.login"); // This might help in some cases
+import Login from "./Login";
+
+import Logo from "@components/common/Logo";
+import logoImage from "@assets/logo.svg";
+import Register from "./Register";
+import supabase from "../../utils/supabaseClient";
 
 function LandingForm() {
-    const [user, setUser] = useState<string | null>(null);
-    console.log(user);
+    const navigate = useNavigate();
+
+    const [flag, setFlag] = useState<boolean>(true);
+
+    const handleToggle = () => setFlag((pv) => !pv);
+
     const handleGoogleSignIn = async () => {
         try {
-            const userCred = await signInWithPopup(auth, provider);
-            const user = userCred.user;
-            console.log(user);
-            // navigate("/home");
-        } catch (error) {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-        }
-    };
+            const content = await supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: {
+                    scopes: "",
+                    redirectTo: import.meta.env.VITE_APP_HOME_PAGE_URL,
+                    queryParams: {
+                        access_type: "offline",
+                        prompt: "consent",
+                    },
+                },
+            });
 
-    const handleLogout = async () => {
-        try {
-            const res = await signOut(auth);
-            console.log(res);
-            // Redirect to login page
-            window.location.href = "/";
-        } catch (error) {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-        }
-    };
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setUser(user);
+            if (!content) {
+                console.error("Error signing in:", error);
             } else {
-                setUser(null);
+                navigate("/home");
             }
-        });
-
-        return () => unsubscribe(); // Cleanup subscription on unmount
-    }, [auth]);
+        } catch (error) {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode, errorMessage);
+        }
+    };
 
     return (
-        <div>
-            <h1>Application Name</h1>
-            <Custom />
-            <button onClick={handleGoogleSignIn} className="m-4 p-2 bg-red-600 text-white rounded">
-                Sign in with Google
-            </button>
-            <button onClick={handleLogout}>Logout</button>
+        <div className="flex-1 flex flex-col justify-center items-center">
+            <div>
+                <Logo src={logoImage} />
+            </div>
+            <div className="text-lg">App Name</div>
+            {flag ? (
+                <Login onChange={handleToggle} handleAuth={handleGoogleSignIn} />
+            ) : (
+                <Register onChange={handleToggle} />
+            )}
         </div>
     );
 }

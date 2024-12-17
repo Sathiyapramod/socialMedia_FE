@@ -1,12 +1,12 @@
 import React from "react";
-import Homepage from "../../components/Homepage/Homepage";
+import Feeds from "@components/Homepage/Feeds";
 
 function Homepage() {
-    return (
-        <div>
-            <Homepage />
-        </div>
-    );
+  return (
+    <>
+      <Feeds />
+    </>
+  );
 }
 
 export default Homepage;
