@@ -8,7 +8,6 @@ interface CreatePostsApp {
 }
 
 function CreatePosts({ onClose }: CreatePostsApp) {
-    console.log({ onClose });
     const [files, setFiles] = useState<File[] | []>([]);
     const [newPost, setNewPost] = useState<string>("");
 
@@ -16,18 +15,41 @@ function CreatePosts({ onClose }: CreatePostsApp) {
         setNewPost(e.target.value);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         try {
             const postData = {
                 post: newPost,
+                created_by: localStorage.getItem("displayName"),
             };
 
-            const { error } = await supabase
-                .from("posts") // Replace with your table name
-                .insert(postData);
+            const { error, data } = await supabase.from("posts").insert(postData).select();
+
             if (!error) {
+                // proceed upload the images
+                if (files.length > 0) {
+                    for (const file of files) {
+                        const fileExt = file.name.split(".").pop();
+                        const fileName = `${Math.random()}.${fileExt}`;
+                        const filePath = `${fileName}`;
+
+                        const { id } = data[0];
+
+                        const { error: uploadError } = await supabase.storage
+                            .from("uploads")
+                            .upload(filePath, file);
+                        if (uploadError) {
+                            throw uploadError;
+                        } else {
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            const uploadStatus = await supabase.from("uploads").insert({
+                                url_path: filePath,
+                                post_id: id,
+                            });
+                        }
+                    }
+                }
                 onClose();
                 setNewPost("");
                 setFiles([]);
@@ -40,7 +62,7 @@ function CreatePosts({ onClose }: CreatePostsApp) {
     };
 
     return (
-        <div className="bg-white h-full relative">
+        <div className="bg-white h-full relative z-10">
             <form onSubmit={handleSubmit}>
                 <textarea
                     className="m-2 w-full rounded-lg border-base-gray text-medium border p-4 min-h-[256px] max-h-[256px] bg-slate-200 placeholder:text-medium placeholder:font-thin focus:border-base-gray focus:outline-none"

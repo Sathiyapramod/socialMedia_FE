@@ -1,31 +1,34 @@
 import React, { useState } from "react";
-import Button from "@components/common/Button";
-import supabase from "../../utils/supabaseClient";
+import Button from "../../components/common/Button";
 import { useNavigate } from "react-router-dom";
+import { doSignInWithEmailAndPassword } from "../../utils/auth";
+import { useAppDispatch } from "../../store/index";
+import { setDisplayName, setToken, setEmail } from "../../store/reducers/auth";
 
-interface AppAuthPage {
+export interface AppAuthPage {
     onChange: () => void;
-    handleAuth: () => void;
+    handleAuth?: (ev: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 function Login({ onChange, handleAuth }: AppAuthPage) {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
-    const [email, setEmail] = useState<string>("");
+    const [userEmail, setUserEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        if (error) {
-            // todo: toaster
-            // todo: include mandatory email & password
-            // if empty , not valid
-            // else proceed
-        } else if (data) {
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+        if (userEmail === "" || password === "") {
+            // todo - introduce toaster
+        } else {
+            e.preventDefault();
+            const { accessToken, email, displayName } = await doSignInWithEmailAndPassword(
+                userEmail,
+                password
+            );
+            dispatch(setDisplayName(displayName));
+            dispatch(setEmail(email ?? ""));
+            dispatch(setToken(accessToken));
             navigate("/home");
         }
     };
@@ -45,7 +48,7 @@ function Login({ onChange, handleAuth }: AppAuthPage) {
                     type="email"
                     required
                     placeholder="john@yourdomain.com"
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setUserEmail(e.target.value)}
                 />
             </div>
 

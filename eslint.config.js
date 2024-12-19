@@ -15,8 +15,8 @@ export default [
     pluginReact.configs.flat.recommended,
     {
         rules: {
-            "react/jsx-uses-react": "off",
-            "react/jsx-uses-vars": "off",
+            "react/jsx-uses-react": "error",
+            "react/jsx-uses-vars": "error",
             "no-console": "warn",
         },
     },

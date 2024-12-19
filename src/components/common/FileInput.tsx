@@ -1,7 +1,7 @@
 import React, { useState, useRef, Dispatch, SetStateAction } from "react";
 import FileButton from "./FileButton";
-import fileUploadIcon from "@assets/fileUpload.svg";
-import camera from "@assets/camera.svg";
+import fileUploadIcon from "../../assets/fileUpload.svg";
+import camera from "../../assets/camera.svg";
 
 interface AppCreatePosts {
     files: File[] | [];
@@ -9,24 +9,26 @@ interface AppCreatePosts {
 }
 
 function FileInput({ files, setFiles }: AppCreatePosts) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
 
-    const ImageUpload = (e) => {
-        const selected = e.target.files;
+    const ImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selected = e.target?.files;
         // for images, either single (or) multiple uploads
         setFiles((prev) => {
-            if (prev.length >= 5) return prev;
-            else return [...prev, ...selected];
+            const selectedFiles = Array.from(selected);
+            if (prev.length + selectedFiles.length >= 5) return prev;
+            else return [...prev, ...selectedFiles];
         });
     };
 
-    const videoUpload = (e) => {
+    const videoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         // for video, only single file upload
-        const selected = e.target.files[0];
-        setFiles([selected]);
+        const selected = e.target.files?.[0];
+        if (selected) setFiles([selected]);
     };
 
     const startWebcam = async () => {
@@ -79,7 +81,7 @@ function FileInput({ files, setFiles }: AppCreatePosts) {
     };
 
     const stopWebcam = () => {
-        // stoping webcam
+        // stopping webcam
 
         if (videoRef.current?.srcObject) {
             const stream = videoRef.current.srcObject as MediaStream;
@@ -112,9 +114,9 @@ function FileInput({ files, setFiles }: AppCreatePosts) {
                 </label>
             </div>
             {isCapturing && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
+                <div className="fixed inset-0 flex items-center justify-center z-100">
                     <div className="fixed inset-0 bg-black opacity-50" onClick={stopWebcam}></div>
-                    <div className="bg-white rounded-lg shadow-lg z-10 w-[500px] h-[500px]">
+                    <div className="bg-white rounded-lg shadow-lg z-100 w-[500px] h-[500px]">
                         <video ref={videoRef} className="w-full h-full"></video>
                         <button onClick={captureFromWebcam}>Capture</button>
                         <button onClick={stopWebcam}>Stop</button>

@@ -1,34 +1,18 @@
 import React, { useState } from "react";
-import Button from "@components/common/Button";
-import { AppAuthPage } from "./Custom";
-import supabase from "../../utils/supabaseClient";
+import Button from "../../components/common/Button";
+import { AppAuthPage } from "./Login";
+import { doCreateUserWithEmailAndPassword, updateUserName } from "../../utils/auth";
 
 function Register({ onChange }: AppAuthPage) {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [email, setEmail] = useState<string>("");
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        await doCreateUserWithEmailAndPassword(email, password);
+        await updateUserName(username);
         onChange();
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        full_name: username,
-                    },
-                },
-            });
-            if (error & !data) {
-                // todo: include toaster
-            } else {
-                // return as usual
-            }
-        } catch (err) {
-            console.log(err);
-        }
     };
 
     return (
