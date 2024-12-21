@@ -8,9 +8,10 @@ import supabase from "../../utils/supabaseClient";
 import { useAppDispatch } from "../../store";
 import { logout } from "../../store/reducers/auth";
 import { useTypedSelector } from "../../store";
+import { toast } from "sonner";
 
 function Navbar() {
-    const data = useTypedSelector((state) => state.users.displayName);
+    const { displayName, photoURL } = useTypedSelector((state) => state.users);
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -19,11 +20,14 @@ function Navbar() {
             const { error } = await supabase.auth.signOut();
             dispatch(logout());
             if (error) {
-                console.log(error);
-            } else navigate("/");
-        } catch (error) {
-            // todo toaster
-            console.log(error);
+                toast.error("Error while Logging out");
+            } else {
+                navigate("/");
+                toast.success("Logged out Successfully");
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+            toast.error("Error");
         }
     };
 
@@ -33,12 +37,12 @@ function Navbar() {
             <div className="flex flex-row justify-between items-center w-full">
                 <div>
                     <div className="text-light-gray text-sm">Welcome Back,</div>
-                    <Heading content={data ?? ""} />
+                    <Heading content={displayName ?? ""} />
                 </div>
                 <div className="hidden md:flex flex-row items-center gap-[25px]">
                     <Heading content="Logout" onClick={handleLogout} classname="cursor-pointer" />
                     {/* state management */}
-                    <Avatar src={""} />
+                    <Avatar src={photoURL} />
                 </div>
             </div>
         </div>

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { doSignInWithEmailAndPassword } from "../../utils/auth";
 import { useAppDispatch } from "../../store/index";
 import { setDisplayName, setToken, setEmail } from "../../store/reducers/auth";
+import { toast } from "sonner";
 
 export interface AppAuthPage {
     onChange: () => void;
@@ -19,7 +20,7 @@ function Login({ onChange, handleAuth }: AppAuthPage) {
 
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
         if (userEmail === "" || password === "") {
-            // todo - introduce toaster
+            toast.error("Credentials cannot be Empty");
         } else {
             e.preventDefault();
             const { accessToken, email, displayName } = await doSignInWithEmailAndPassword(

@@ -39,13 +39,14 @@ export const doSignInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-
-    const { accessToken, email, displayName } = user as {
+    console.log(user);
+    const { accessToken, email, displayName, photoURL } = user as {
         accessToken?: string;
         email?: string;
         displayName?: string;
+        photoURL?: string;
     };
-    return { accessToken, email, displayName };
+    return { accessToken, email, displayName, photoURL };
 };
 
 export const doSignOut = () => {

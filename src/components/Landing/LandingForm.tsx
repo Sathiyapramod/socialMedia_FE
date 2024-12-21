@@ -10,7 +10,7 @@ import Register from "./Register";
 
 import { doSignInWithGoogle } from "../../utils/auth";
 import { useAppDispatch } from "../../store";
-import { setDisplayName, setToken, setEmail } from "../../store/reducers/auth";
+import { setDisplayName, setToken, setEmail, setPhoto } from "../../store/reducers/auth";
 
 function LandingForm() {
     const navigate = useNavigate();
@@ -22,10 +22,12 @@ function LandingForm() {
 
     const handleGoogleSignIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        const { accessToken, email, displayName } = await doSignInWithGoogle();
+
+        const { accessToken, email, displayName, photoURL } = await doSignInWithGoogle();
         dispatch(setDisplayName(displayName));
         dispatch(setEmail(email ?? ""));
         dispatch(setToken(accessToken));
+        dispatch(setPhoto(photoURL ?? ""));
         navigate("/home");
     };
     return (
@@ -33,7 +35,7 @@ function LandingForm() {
             <div>
                 <Logo src={logoImage} />
             </div>
-            <div className="text-lg">App Name</div>
+            <div className="text-lg">Jatayu</div>
             {flag ? (
                 <Login onChange={handleToggle} handleAuth={handleGoogleSignIn} />
             ) : (

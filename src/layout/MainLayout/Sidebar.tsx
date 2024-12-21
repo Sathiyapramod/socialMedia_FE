@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import Sidemenu from "../../components/Sidebar/Sidemenu";
 import Button from "../../components/common/Button";
-import Modal from "../../components/common/Modal";
-import CreatePosts from "../../components/Homepage/CreatePosts";
+import { setClose } from "../../store/reducers/posts";
+import { useAppDispatch } from "../../store";
 
-function Sidebar() {
-    const [isOpen, setOpen] = useState<boolean>(false);
+function Sidebar(): React.ReactNode {
+    const dispatch = useAppDispatch();
 
-    const onClose = () => setOpen((pv) => !pv);
+    const onClose = () => {
+        dispatch(setClose());
+    };
 
     return (
         <div className="w-[235px] mt-[70px]">
@@ -18,9 +20,6 @@ function Sidebar() {
                 onClick={onClose}
                 classname="ml-[32px] mt-[56px]"
             />
-            <Modal isOpen={isOpen} onClose={onClose} title="Create Post">
-                <CreatePosts onClose={onClose} />
-            </Modal>
         </div>
     );
 }

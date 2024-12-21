@@ -4,12 +4,14 @@ interface StoreUserType {
     displayName: string;
     accessToken: string;
     email: string;
+    photoURL: string;
 }
 
 const initialState: StoreUserType = {
     displayName: "",
     accessToken: "",
     email: "",
+    photoURL: "",
 };
 
 export const userSlice = createSlice({
@@ -25,12 +27,15 @@ export const userSlice = createSlice({
         setEmail(state, action) {
             state.email = action.payload;
         },
+        setPhoto(state, action) {
+            state.photoURL = action.payload;
+        },
         logout() {
             return initialState;
         },
     },
 });
 
-export const { setDisplayName, setToken, setEmail, logout } = userSlice.actions;
+export const { setDisplayName, setToken, setEmail, setPhoto, logout } = userSlice.actions;
 
 export default userSlice.reducer;

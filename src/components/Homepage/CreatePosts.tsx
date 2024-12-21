@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import FileInput from "../common/FileInput";
 import Button from "../common/Button";
-import supabase from "../../utils/supabaseClient";
+import { useAppDispatch } from "../../store";
+import { createPost, fetchPosts } from "../../store/reducers/posts";
+import { toast } from "sonner";
 
 interface CreatePostsApp {
     onClose: () => void;
 }
 
-function CreatePosts({ onClose }: CreatePostsApp) {
+function CreatePosts({ onClose = () => {} }: CreatePostsApp) {
+    const dispatch = useAppDispatch();
     const [files, setFiles] = useState<File[] | []>([]);
     const [newPost, setNewPost] = useState<string>("");
 
@@ -15,54 +18,23 @@ function CreatePosts({ onClose }: CreatePostsApp) {
         setNewPost(e.target.value);
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
+    const handleSubmit = async () => {
         try {
-            const postData = {
-                post: newPost,
-                created_by: localStorage.getItem("displayName"),
-            };
+            await dispatch(createPost({ post: newPost, files }));
 
-            const { error, data } = await supabase.from("posts").insert(postData).select();
+            await dispatch(fetchPosts(0));
 
-            if (!error) {
-                // proceed upload the images
-                if (files.length > 0) {
-                    for (const file of files) {
-                        const fileExt = file.name.split(".").pop();
-                        const fileName = `${Math.random()}.${fileExt}`;
-                        const filePath = `${fileName}`;
-
-                        const { id } = data[0];
-
-                        const { error: uploadError } = await supabase.storage
-                            .from("uploads")
-                            .upload(filePath, file);
-                        if (uploadError) {
-                            throw uploadError;
-                        } else {
-                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                            const uploadStatus = await supabase.from("uploads").insert({
-                                url_path: filePath,
-                                post_id: id,
-                            });
-                        }
-                    }
-                }
-                onClose();
-                setNewPost("");
-                setFiles([]);
-
-                // todo : toaster placement
-            }
+            onClose();
+            setNewPost("");
+            setFiles([]);
+            toast.success("Great ! Your Post has been created !!! 😊");
         } catch (err) {
             console.error("Error uploading post:", err);
         }
     };
 
     return (
-        <div className="bg-white h-full relative z-10">
+        <div className="bg-white h-full">
             <form onSubmit={handleSubmit}>
                 <textarea
                     className="m-2 w-full rounded-lg border-base-gray text-medium border p-4 min-h-[256px] max-h-[256px] bg-slate-200 placeholder:text-medium placeholder:font-thin focus:border-base-gray focus:outline-none"

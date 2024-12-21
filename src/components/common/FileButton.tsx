@@ -10,7 +10,7 @@ interface AppFileButton {
 
 function FileButton({ content, onClick, src, accept, capture }: AppFileButton) {
     return (
-        <div className="inline-block relative">
+        <div className="inline-block">
             <input
                 type="file"
                 accept={accept}
